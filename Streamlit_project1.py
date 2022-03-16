@@ -21,7 +21,11 @@ from sklearn.mixture import GaussianMixture
 import Lib
 
 # 1. Read data
-df = pd.read_csv("../Project1_CustomerSegmentation/data/OnlineRetail.csv", encoding='unicode_escape')
+# df = pd.read_csv("OnlineRetail.csv", encoding='unicode_escape')
+import zipfile
+
+zf = zipfile.ZipFile('OnlineRetail.csv.zip') 
+df = pd.read_csv(zf.open('OnlineRetail.csv'), encoding='unicode_escape')
 
 #--------------
 # GUI
