@@ -5,11 +5,11 @@ matplotlib
 seaborn
 scikit-learn
 squarify 
-datetime.datetime
-matplotlib.pyplot
-plotly.express
-collections.Counter
+datetime
+
+plotly
+collections
 import_ipynb
-sklearn.metrics
-sklearn.mixture.GaussianMixture
+sklearn
+
 Lib
