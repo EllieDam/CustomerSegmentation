@@ -4,6 +4,7 @@ pandas
 matplotlib
 seaborn
 scikit-learn
+pickle-mixin
 pickle
 math
 squarify 
