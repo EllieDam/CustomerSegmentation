@@ -21,11 +21,7 @@ from sklearn.mixture import GaussianMixture
 import Lib
 
 # 1. Read data
-# df = pd.read_csv("OnlineRetail.csv", encoding='unicode_escape')
-import zipfile
-
-zf = zipfile.ZipFile('OnlineRetail.csv.zip') 
-df = pd.read_csv(zf.open('OnlineRetail.csv'), encoding='unicode_escape')
+df = pd.read_csv("OnlineRetail.zip", encoding='unicode_escape')
 
 #--------------
 # GUI
@@ -165,8 +161,8 @@ elif choice == 'Build Project':
     Cluster description:
     - Cluster 4 - SVIP: Nhóm khách hàng đặc biệt (chỉ có 2 người) chi tiêu rất khủng, mua hàng thường xuyên nhất và vẫn đang mua hàng.
     - Cluster 1 - VIP1: Nhóm khách hàng chi tiêu cao, mua hàng thường xuyên và mới mua hàng gần đây.
-    - Cluster 3 - VIP2: Nhóm khách hàng chi tiêu cao nhưng ít hơn VIP1, mua hàng thường xuyên và mới mua hàng gần đây.
-    - Cluster 2 - Loyal/Regular: Khách hàng mua hàng đều đặn, chi tiêu ở mức khá, thời gian mua hàng gần nhất không xa.
+    - Cluster 2 - VIP2: Nhóm khách hàng chi tiêu cao nhưng ít hơn VIP1, mua hàng thường xuyên và mới mua hàng gần đây.
+    - Cluster 3 - Loyal/Regular: Khách hàng mua hàng đều đặn, chi tiêu ở mức khá, thời gian mua hàng gần nhất không xa.
     - Cluster 0 - Member: Khách hàng mua hàng không thường xuyên, chi tiêu không cao và đã khá lâu không mua hàng.
     """)  
 
