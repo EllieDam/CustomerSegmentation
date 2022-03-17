@@ -19,6 +19,7 @@ import import_ipynb
 import streamlit as st
 from sklearn.mixture import GaussianMixture
 import Lib
+import seaborn as sns 
 
 # 1. Read data
 df = pd.read_csv("OnlineRetail.zip", encoding='unicode_escape')
@@ -26,13 +27,13 @@ df = pd.read_csv("OnlineRetail.zip", encoding='unicode_escape')
 #--------------
 # GUI
 st.title("Data Science Projects")
-st.write("PROJECT 1 - Customer Segmentation")
+st.title("PROJECT 1 - Customer Segmentation")
 
-# Upload file
-uploaded_file = st.file_uploader('Choose a file', type=['csv'])
-if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file, encoding='latin-1')
-    data.to_csv('OnlineRetail_new.csv', index=False)
+# # Upload file
+# uploaded_file = st.file_uploader('Choose a file', type=['csv'])
+# if uploaded_file is not None:
+#     data = pd.read_csv(uploaded_file, encoding='latin-1')
+#     data.to_csv('OnlineRetail_new.csv', index=False)
 
 # 2. Data pre-processing
 # drop rows where Quantity < 0
@@ -94,6 +95,9 @@ gmm_agg['Percent'] = round((gmm_agg['Count']/gmm_agg.Count.sum())*100, 2)
 
 # Reset the index
 gmm_agg = gmm_agg.reset_index()
+dict_seg = {0:'Member', 1:'VIP1', 2:'VIP2', 4:'SVIP', 3:'Loyal/Regular'}
+gmm_agg['GMM_segment_name'] = gmm_agg['GMM_segment'].apply(lambda x: dict_seg[x])
+df_RFM['GMM_segment_name'] = df_RFM['GMM_segment'].apply(lambda x: dict_seg[x])
 
 # #4. Save models
 # pkl_filename = "Customer_Segmentation_GMM.pkl"  
@@ -113,8 +117,12 @@ if choice == 'Business Objective':
     - Công ty X chủ yếu bán các sản phẩm là quà tặng dành cho những dịp đặc biệt. Nhiều khách hàng của công ty là khách hàng bán buôn.
     - Công ty X mong muốn có thể bán được nhiều sản phẩm hơn cũng như giới thiệu sản phẩm đến đúng đối tượng khách hàng, chăm sóc và làm hài lòng khách hàng.
     """)  
-    st.write("""###### => Problem/ Requirement: Sử dụng Machine Learning để phân loại các nhóm khách hàng.""")
-
+    st.code("""=> PROBLEM/ REQUIREMENT: Sử dụng Machine Learning để phân loại các nhóm khách hàng.""")
+    st.code("""=> SOLUTION: Phân nhóm khách hàng dựa trên các chỉ số:
+            - Recency (R): Thời gian mua hàng gần nhất
+            - Frequency (F): Tần suất mua hàng
+            - Monetary (M): Tổng chi tiêu""")
+    st.image('RFM_solution.jpg')
 elif choice == 'Build Project':
     st.subheader('Build Project')
     st.write('### 1. Raw data')
@@ -165,6 +173,20 @@ elif choice == 'Build Project':
     - Cluster 3 - Loyal/Regular: Khách hàng mua hàng đều đặn, chi tiêu ở mức khá, thời gian mua hàng gần nhất không xa.
     - Cluster 0 - Member: Khách hàng mua hàng không thường xuyên, chi tiêu không cao và đã khá lâu không mua hàng.
     """)  
+    st.dataframe(df_RFM.head())
+    fig = plt.figure(figsize=(15, 6))
+    sns.set_style('darkgrid')
+    plt.subplot(1,3,1)
+    sns.boxplot(x='GMM_segment_name', y='Recency', data=df_RFM)
+    plt.title('Recency')
+    plt.subplot(1,3,2)
+    sns.boxplot(x='GMM_segment_name', y='Frequency', data=df_RFM)
+    plt.title('Frequency')
+    plt.subplot(1,3,3)
+    sns.boxplot(x='GMM_segment_name', y='Monetary', data=df_RFM)
+    plt.title('Monetary')
+    plt.tight_layout()
+    st.pyplot(fig)
 
     # Visualize results
     fig = plt.figure(figsize=(10, 5))
@@ -192,10 +214,15 @@ elif choice == 'New Prediction':
         flag=True
 
     if flag:
-        st.write('Content:')
+        st.write('Result:')
         if data.shape[0]>0:
             #Preprocessing 
             data_RFM = Lib.df_RMF_preprocessing(data)
             gmm_segment = gmm.predict(data_RFM[['Recency','Frequency','Monetary']])
             data_RFM['GMM_segment'] = gmm_segment
-            st.dataframe(data_RFM.head())
+            data_RFM['GMM_segment_name'] = data_RFM['GMM_segment'].apply(lambda x: dict_seg[x])
+            # data_agg = Lib.create_df_agg(data_RFM, 'GMM_segment')
+            # data_agg['GMM_segment'] = gmm_segment
+            # data_agg['GMM_segment_name'] = data_agg['GMM_segment'].apply(lambda x: dict_seg[x])
+            # st.dataframe(data_gmm.head())
+            st.dataframe(data_RFM.head(20))
