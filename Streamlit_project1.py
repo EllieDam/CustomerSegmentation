@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 import plotly.express as px
+import plotly.graph_objects as go
 from collections import Counter
 
 import warnings
@@ -27,7 +28,7 @@ df = pd.read_csv("OnlineRetail.zip", encoding='unicode_escape')
 #--------------
 # GUI
 st.title("Data Science Projects")
-st.title("PROJECT 1 - Customer Segmentation")
+st.header("PROJECT 1 - Customer Segmentation")
 
 # # Upload file
 # uploaded_file = st.file_uploader('Choose a file', type=['csv'])
@@ -154,15 +155,20 @@ elif choice == 'Build Project':
     plt.suptitle('Boxplot of R, F, M')
     st.pyplot(fig)
 
-    st.write('### 4. Build model...')
-    st.write('### 5. Report')
+    st.write('### 4. Build model& Report')
 
     # Visualize results
-    fig = plt.figure(figsize=(8, 5))
-    count = df_RFM.groupby(df_RFM['GMM_segment']).size()
-    plt.bar(count.index, count.values, color='olivedrab')
-    plt.xticks(rotation=90)
-    st.pyplot(fig)
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig = plt.figure(figsize=(8, 5))
+        count = df_RFM.groupby(df_RFM['GMM_segment_name']).size()
+        fig, ax =  plt.subplots()
+        ax.bar(count.index, count.values, color='lightskyblue')
+        for container in ax.containers:
+            ax.bar_label(container)
+        plt.xticks(rotation=90)
+        st.pyplot(fig)
 
     st.dataframe(gmm_agg)
     st.write("""
@@ -205,24 +211,53 @@ elif choice == 'Build Project':
     st.plotly_chart(fig)
 
 elif choice == 'New Prediction':
-    st.write('Upload data')
-    flag = False
-    uploaded_file2 = st.file_uploader('Choose a csv file', type=['csv'])
-    if uploaded_file2 is not None:
-        data = pd.read_csv(uploaded_file2, encoding='latin-1')
-        st.dataframe(data)
-        flag=True
+    option = st.radio('Select one',['Upload data','Input values of R,F,M'])
+    
+    if option == 'Upload data':
+        flag = False
+        uploaded_file2 = st.file_uploader('Choose a csv file', type=['csv'])
+        if uploaded_file2 is not None:
+            data = pd.read_csv(uploaded_file2, encoding='latin-1')
+            st.dataframe(data)
+            st.write('Data shape:', data.shape)
+            flag=True
 
-    if flag:
-        st.write('Result:')
-        if data.shape[0]>0:
-            #Preprocessing 
-            data_RFM = Lib.df_RMF_preprocessing(data)
-            gmm_segment = gmm.predict(data_RFM[['Recency','Frequency','Monetary']])
-            data_RFM['GMM_segment'] = gmm_segment
-            data_RFM['GMM_segment_name'] = data_RFM['GMM_segment'].apply(lambda x: dict_seg[x])
-            # data_agg = Lib.create_df_agg(data_RFM, 'GMM_segment')
-            # data_agg['GMM_segment'] = gmm_segment
-            # data_agg['GMM_segment_name'] = data_agg['GMM_segment'].apply(lambda x: dict_seg[x])
-            # st.dataframe(data_gmm.head())
-            st.dataframe(data_RFM.head(20))
+        if flag:
+            st.write('Result:')
+            if data.shape[0]>0:
+                #Preprocessing 
+                data_RFM = Lib.df_RMF_preprocessing(data)
+                gmm_segment = gmm.predict(data_RFM[['Recency','Frequency','Monetary']])
+                data_RFM['GMM_segment'] = gmm_segment
+                data_RFM['GMM_segment_name'] = data_RFM['GMM_segment'].apply(lambda x: dict_seg[x])
+                data_RFM.to_csv('Results.csv')
+                st.dataframe(data_RFM)
+                value_counts = data_RFM['GMM_segment_name'].value_counts()
+                st.code(value_counts)
+                fig = px.scatter_3d(df_RFM, x='Recency', y='Frequency', z='Monetary',
+                    color = 'GMM_segment', opacity=0.5)
+                fig.update_traces(marker=dict(size=5),selector=dict(mode='markers'))
+
+                fig.add_trace(go.Scatter3d(x=data_RFM['Recency'], y=data_RFM['Frequency'], z=data_RFM['Monetary'], 
+                           mode='markers',marker=dict(color='green', symbol='cross'), textposition='top left', showlegend=False))
+                st.plotly_chart(fig)
+    else:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            recency = st.number_input('Recency', min_value=0, step=1)
+            st.write('The current number is ', recency)
+        with col2:
+            frequency = st.number_input('Frequency', min_value=0, step=1)
+            st.write('The current number is ', frequency)
+        with col3:
+            monetary = st.number_input('Monetary', min_value=0.00,)
+            st.write('The current number is ', monetary)
+        if (recency!=0) & (frequency!=0) & (monetary!=0):
+            gmm_segment2 = gmm.predict([[recency,frequency,monetary]])
+            st.write('Customer Segment:', dict_seg[gmm_segment2[0]])
+            fig = px.scatter_3d(df_RFM, x='Recency', y='Frequency', z='Monetary',
+                        color = 'GMM_segment', opacity=0.5)
+            fig.update_traces(marker=dict(size=5),selector=dict(mode='markers'))
+            fig.add_trace(go.Scatter3d(x=[recency], y=[frequency], z=[monetary], 
+                            mode='markers',marker=dict(color='green', symbol='cross',size=15), textposition='top left', showlegend=False))
+            st.plotly_chart(fig)
