@@ -337,7 +337,7 @@ elif choice == 'New Prediction':
             #             color = 'Cluster', opacity=0.5)
             # fig.update_traces(marker=dict(size=5),selector=dict(mode='markers'))
             fig.add_trace(go.Scatter3d(x=np.log([recency]), y=np.log([frequency]), z=np.log([monetary]), 
-                            mode='markers',marker=dict(color='cyan', line=dict(color='black',width=40), symbol='x',size=10), 
+                            mode='markers',marker=dict(color='cyan', line=dict(color='black',width=40), symbol='x',size=8), 
                             textposition='top left', showlegend=False))
             st.plotly_chart(fig)
         else: 
