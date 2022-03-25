@@ -303,44 +303,45 @@ elif choice == 'New Prediction':
         with col3:
             monetary = st.number_input('Monetary', min_value=0.00,)
             st.write('The current number is ', monetary)
-        if (recency>=0) & (frequency>0) & (monetary>0):
-            df_rfm = pd.DataFrame([recency,frequency,monetary]).T
-            df_rfm.columns = ['Recency','Frequency','Monetary']            
-            df_rfm_no, data_outlier = Lib.drop_outliers_predict(df_rfm, max_m, max_f, max_r)
-            if df_rfm_no.shape[0]>0:
-                df_rfm_no = scaler.transform(df_rfm_no)
-            
-            elite, regular, ghost = Lib.elite_regular_ghost_group(df_rfm, data_outlier, max_m, max_f, max_r, Monetary_mean)
-            if elite.shape[0]>0:
-                    cluster = 4
-                    result = 'Platinum'
-            elif ghost.shape[0]>0:
-                    cluster = 1
-                    result = 'Ghost'
-            elif regular.shape[0]>0:
-                    cluster = 3
-                    result = 'Deluxe'
-            else:
-                segment2 = kmeans_model.predict(df_rfm_no)
-                cluster = segment2[0]
-                result = dict_seg[cluster]
-            st.write('Customer Segment:', cluster, ' - ',result)
-            #Visualization 
-            data_RFM_kmeans['Monetary'] = np.log(data_RFM_kmeans['Monetary'])
-            data_RFM_kmeans['Frequency'] = np.log(data_RFM_kmeans['Frequency'])
-            data_RFM_kmeans['Recency'] = np.log(data_RFM_kmeans['Recency'])                
-            fig = px.scatter_3d(data_RFM_kmeans, x='Recency', y='Frequency', z='Monetary',
-                                    color = 'Cluster', opacity=0.5)
-            fig.update_traces(marker=dict(size=5),selector=dict(mode='markers'))
-            
-            # fig = px.scatter_3d(data_RFM_kmeans2, x='Recency', y='Frequency', z='Monetary',
-            #             color = 'Cluster', opacity=0.5)
-            # fig.update_traces(marker=dict(size=5),selector=dict(mode='markers'))
-            fig.add_trace(go.Scatter3d(x=np.log([recency]), y=np.log([frequency]), z=np.log([monetary]), 
-                            mode='markers',marker=dict(color='cyan', line=dict(color='black',width=40), symbol='x',size=8), 
-                            textposition='top left', showlegend=False))
-            st.plotly_chart(fig)
-        else: 
-            st.code(
-            """ValueError: \n- Valid values: Recency>=0, Frequency>0, Monetary>0""")
-            
+        if st.button('Make Prediction'):
+            if (recency>=0) & (frequency>0) & (monetary>0):
+                df_rfm = pd.DataFrame([recency,frequency,monetary]).T
+                df_rfm.columns = ['Recency','Frequency','Monetary']            
+                df_rfm_no, data_outlier = Lib.drop_outliers_predict(df_rfm, max_m, max_f, max_r)
+                if df_rfm_no.shape[0]>0:
+                    df_rfm_no = scaler.transform(df_rfm_no)
+                
+                elite, regular, ghost = Lib.elite_regular_ghost_group(df_rfm, data_outlier, max_m, max_f, max_r, Monetary_mean)
+                if elite.shape[0]>0:
+                        cluster = 4
+                        result = 'Platinum'
+                elif ghost.shape[0]>0:
+                        cluster = 1
+                        result = 'Ghost'
+                elif regular.shape[0]>0:
+                        cluster = 3
+                        result = 'Deluxe'
+                else:
+                    segment2 = kmeans_model.predict(df_rfm_no)
+                    cluster = segment2[0]
+                    result = dict_seg[cluster]
+                st.write('Customer Segment:', cluster, ' - ',result)
+                #Visualization 
+                data_RFM_kmeans['Monetary'] = np.log(data_RFM_kmeans['Monetary'])
+                data_RFM_kmeans['Frequency'] = np.log(data_RFM_kmeans['Frequency'])
+                data_RFM_kmeans['Recency'] = np.log(data_RFM_kmeans['Recency'])                
+                fig = px.scatter_3d(data_RFM_kmeans, x='Recency', y='Frequency', z='Monetary',
+                                        color = 'Cluster', opacity=0.5)
+                fig.update_traces(marker=dict(size=5),selector=dict(mode='markers'))
+                
+                # fig = px.scatter_3d(data_RFM_kmeans2, x='Recency', y='Frequency', z='Monetary',
+                #             color = 'Cluster', opacity=0.5)
+                # fig.update_traces(marker=dict(size=5),selector=dict(mode='markers'))
+                fig.add_trace(go.Scatter3d(x=np.log([recency]), y=np.log([frequency]), z=np.log([monetary]), 
+                                mode='markers',marker=dict(color='cyan', line=dict(color='black',width=40), symbol='x',size=8), 
+                                textposition='top left', showlegend=False))
+                st.plotly_chart(fig)
+            else: 
+                st.code(
+                """ValueError: \n- Valid values: Recency>=0, Frequency>0, Monetary>0""")
+                
